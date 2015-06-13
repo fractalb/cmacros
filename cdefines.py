@@ -1,9 +1,8 @@
 #! /usr/bin/python3
 
-from __future__ import print_function
-
-import string
+from pathlib import Path
 import re
+#import pdb
 
 defstart = re.compile(r'#[ \t]*define[ \t(]')
 tokentest = re.compile(r'([ \t]*)##([ \t]*)')
@@ -44,7 +43,7 @@ class Defline:
         while match:
             mstr = match.group()
             tlen = len(mstr)
-            temp_value = temp_value[end_index:].replace(mstr, "##")
+            temp_value = temp_value[:end_index] + temp_value[end_index:].replace(mstr, "##")
             end_index += (match.end()-tlen+2)
             match = tokentest.search(temp_value[end_index:])
         tokens = [x for x in re.split(stripchars,temp_value)]
@@ -152,7 +151,7 @@ def split_n_save_macro(macrostr, filename, lno):
             elif c == ")":
                 #raise Exception("Cannot parse string: %s" % macrostr)
                 return None
-            elif c in string.whitespace:
+            elif c in " \t\n":
                 return Defline(macrostr[:index], None,  macrostr[index+1:].lstrip(), filename, lno)
     if paren > 0:
         #raise Exception("Malformed macro string: %s" % macrostr)
@@ -198,9 +197,8 @@ def main(source_path):
                         break
             
 
-from prompt_toolkit.shortcuts import get_input
-from prompt_toolkit.contrib.completers import WordCompleter
-from prompt_toolkit.contrib.completers import PathCompleter
+#from prompt_toolkit.contrib.completers import PathCompleter
+#from prompt_toolkit.contrib.completers import WordCompleter
 from prompt_toolkit.shortcuts import get_input
 from prompt_toolkit.history import History
 import sys
