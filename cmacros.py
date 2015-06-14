@@ -5,11 +5,13 @@ from prompt_toolkit.shortcuts import get_input
 from prompt_toolkit.history import History
 import sys
 import re
+import os
 
 macro_start = re.compile(r'#[ \t]*define[ \t(]')
 token_pattern = re.compile(r'([ \t]*)##([ \t]*)')
 strip_chars = r"[()[\]{}.,?:;+\-=<>*^~|&%!/ \t\n\\]+"
 macro_list = []
+unique_filenames = set()
 
 class Macro:
     def __init__(self, expr, params, body, filename, lineno):
@@ -83,9 +85,10 @@ def build_defs(p="."):
                         macrostr = line+"\n"
                         lineno = lno
                     else:
-                        obj = parse_macro(line, fl, lno)
-                        if obj:
-                            macro_list.append(obj)
+                        macro_obj = parse_macro(line, fl, lno)
+                        if macro_obj:
+                            macro_list.append(macro_obj)
+                            unique_filenames.add(macro_obj.filename)
                         else:
                             print_err(line, fl, lno)
                 elif macrostr:
@@ -96,9 +99,10 @@ def build_defs(p="."):
                     if line.endswith("\\"):
                         macrostr += "\n"
                     else:
-                        obj = parse_macro(macrostr, fl, lineno)
-                        if obj:
-                            macro_list.append(obj)
+                        macro_obj = parse_macro(macrostr, fl, lineno)
+                        if macro_obj:
+                            macro_list.append(macro_obj)
+                            unique_filenames.add(macro_obj.filename)
                         else:
                             print_err(macrostr, fl, lineno)
                         macrostr = None
@@ -191,10 +195,16 @@ def main(source_path):
         command = temp_list[0]
         args = temp_list[1] if len(temp_list) == 2 else None
         if command == "expr" and args:
+            '''expr <text>
+            lists macros which contain <text> in its expressions
+            '''
             x = get_def(args)
             for y in x:
                 print(y)
         elif command == "body" and args:
+            '''body <text>
+            lists macros which contain the given <text> in their bodies
+            '''
             for (i,x) in enumerate(macro_list):
                 y = x.get_regex_matchers()
                 for z in y:
@@ -204,13 +214,29 @@ def main(source_path):
                         print(x)
                         break
         elif command == "list":
+            '''list <text>
+            lists macros which contain the given <text> in its macro expression
+            lists all macros if no <text>
+            '''
             if args:
                 for x in macro_list:
-                    if args in x:
+                    if args in x.expr:
                         print(x)
             else:
                 for x in macro_list:
                     print(x)
+        elif command == "from" and args:
+            '''from <file>
+            lists macros from the given <file>
+            '''
+            for x in macro_list:
+                if  x.filename.endswith(os.sep+args):
+                    print(x)
+        elif command == "files":
+            '''lists all the files which contain macros'''
+            for x in unique_filenames:
+                print(x)
+            print("Total files with Macros: %d" % len(unique_filenames))
             
 
 if __name__ == '__main__':
