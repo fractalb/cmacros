@@ -170,14 +170,23 @@ def parse_macro(macrostr, filename, lineno):
     else:
         return Macro(macrostr, None, None, filename, lineno)
 
-
-def get_def(defstr):
-    deflist = []
-    for x in macro_list:
-        if defstr == x.expr:
-            deflist.append(x)
-    return deflist
-
+def print_matching_macros(expr, fullmatch=True):
+    i = 0
+    if fullmatch:
+        for x in macro_list:
+            if expr == x.expr:
+                print(x)
+                i += 1
+    elif expr:
+        for x in macro_list:
+            if expr in x.expr:
+                print(x)
+                i += 1
+    else:
+        for x in macro_list:
+            print(x)
+        i = len(macro_list)
+    print("Total matching macros:%d" % i)
 
 def main(source_path):
     build_defs(source_path)
@@ -198,13 +207,13 @@ def main(source_path):
             '''expr <text>
             lists macros which contain <text> in its expressions
             '''
-            x = get_def(args)
-            for y in x:
-                print(y)
+            print_matching_macros(args)
         elif command == "body" and args:
             '''body <text>
-            lists macros which contain the given <text> in their bodies
+            lists macros which contain the given <text> in their bodies OR
+            lists macros which can expand to the given <text>
             '''
+            n = 0
             for (i,x) in enumerate(macro_list):
                 y = x.get_regex_matchers()
                 for z in y:
@@ -212,19 +221,15 @@ def main(source_path):
                     if match:
                         print("Macro:%d" % i)
                         print(x)
+                        n += 1
                         break
+            print("Total possible macros:%d" % n)
         elif command == "list":
             '''list <text>
             lists macros which contain the given <text> in its macro expression
             lists all macros if no <text>
             '''
-            if args:
-                for x in macro_list:
-                    if args in x.expr:
-                        print(x)
-            else:
-                for x in macro_list:
-                    print(x)
+            print_matching_macros(args, fullmatch=False)
         elif command == "from" and args:
             '''from <file>
             lists macros from the given <file>
