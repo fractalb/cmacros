@@ -116,11 +116,11 @@ def print_err(macrostr, filename, lineno):
 
 
 def parse_macro(macrostr, filename, lineno):
-    '''The macro string should not be written in exotic ways
+    '''It expects no non-space characters between '#' and 'define'
     Not all valid strings are recognized.
-    e.g /* */# /**/define AB BA
+    e.g # /*comments*/define AB BA
     The above string is not recognized even though it is
-    valid in C. `#define` should not be written in exotic ways.
+    valid in C. `#define` written in any exotic ways is not recognized
     Some valid examples:
     #define <something>
     #define <something> <otherthing>
