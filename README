@@ -1,0 +1,25 @@
+Should be run as:
+        ./cmacros.py <path to a C/C++ source directory>
+
+It'll will prompt you with,
+        Def: 
+
+Commands:
+
+1. expr <text>
+    lists macros which contain <text> in its expressions
+
+2. body <text>
+    lists macros which contain the given <text> in their bodies. (OR)
+    lists macros which can expand to the given <text>
+
+3. list <text>
+    lists macros which contain the given <text> in its macro expression.
+    lists all macros if no <text> is given.
+
+4. from <file>
+    lists all macros present in the given <file>
+
+5. files
+    lists all the files which contain macros
+
