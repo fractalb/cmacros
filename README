@@ -1,8 +1,7 @@
 Should be run as:
         ./cmacros.py <path to a C/C++ source directory>
 
-It'll will prompt you with,
-        Def: 
+It'll will prompt you with <Def:>. Press <Ctrl-D> to exit
 
 Commands:
 
