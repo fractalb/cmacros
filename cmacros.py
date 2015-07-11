@@ -1,11 +1,10 @@
 #! /usr/bin/python3
 
 from pathlib import Path
-from prompt_toolkit.shortcuts import get_input
-from prompt_toolkit.history import History
 import sys
 import re
 import os
+import readline
 
 macro_start = re.compile(r'#[ \t]*define[ \t(]')
 token_pattern = re.compile(r'([ \t]*)##([ \t]*)')
@@ -191,10 +190,9 @@ def print_matching_macros(expr, fullmatch=True):
 def main(source_path):
     build_defs(source_path)
     print("Total Macros:%d" % len(macro_list))
-    history = History()
     while True:
         try:
-            command_str = get_input('Def: ', history=history).lstrip()
+            command_str = input('Def: ')
         except EOFError:
             break 
 
