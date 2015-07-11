@@ -9,6 +9,8 @@ import readline
 macro_start = re.compile(r'#[ \t]*define[ \t(]')
 token_pattern = re.compile(r'([ \t]*)##([ \t]*)')
 strip_chars = r"[()[\]{}.,?:;+\-=<>*^~|&%!/ \t\n\\]+"
+file_patterns = ["*.c", "*.h", "*.cc", "*.hh", "*.hpp",
+                 "*.C", "*.c++", "*.cp", "*.cpp", "*.cxx"]
 macro_list = []
 unique_filenames = set()
 
@@ -66,48 +68,52 @@ class Macro:
 
 
 def build_defs(p="."):
-    file_pattern="*.[ch]"
     if not Path(p).exists(): 
-        raise Exception("Path doesn't exist")
+        #raise Exception("Path doesn't exist")
+        print("%: Path doesn't exist\n")
+        sys.exit()
     global macro_list
     macro_list.clear()
-    for fl in map(str, Path(p).rglob(file_pattern)):
-        with open(fl, errors='ignore') as f:
-            macrostr = None 
-            lineno = None
-            for (lno, line) in enumerate(f, start=1):
-                line = line.strip()
-                if macro_start.match(line):
-                    assert macrostr is None
-                    assert lineno is None
-                    if line.endswith("\\"):
-                        macrostr = line+"\n"
-                        lineno = lno
-                    else:
-                        macro_obj = parse_macro(line, fl, lno)
-                        if macro_obj:
-                            macro_list.append(macro_obj)
-                            unique_filenames.add(macro_obj.filename)
+    for fp in file_patterns:
+        for fl in Path(p).rglob(fp):
+            if fl.is_symlink():
+                continue
+            with fl.open(errors='ignore') as f:
+                macrostr = None
+                lineno = None
+                for (lno, line) in enumerate(f, start=1):
+                    line = line.strip()
+                    if macro_start.match(line):
+                        assert macrostr is None
+                        assert lineno is None
+                        if line.endswith("\\"):
+                            macrostr = line+"\n"
+                            lineno = lno
                         else:
-                            print_err(line, fl, lno)
-                elif macrostr:
-                    assert isinstance(macrostr, str)
-                    assert isinstance(lineno, int)
-                    assert lineno is not None
-                    macrostr += line
-                    if line.endswith("\\"):
-                        macrostr += "\n"
-                    else:
-                        macro_obj = parse_macro(macrostr, fl, lineno)
-                        if macro_obj:
-                            macro_list.append(macro_obj)
-                            unique_filenames.add(macro_obj.filename)
+                            macro_obj = parse_macro(line, fl, lno)
+                            if macro_obj:
+                                macro_list.append(macro_obj)
+                                unique_filenames.add(macro_obj.filename)
+                            else:
+                                print_err(line, fl, lno)
+                    elif macrostr:
+                        assert isinstance(macrostr, str)
+                        assert isinstance(lineno, int)
+                        assert lineno is not None
+                        macrostr += line
+                        if line.endswith("\\"):
+                            macrostr += "\n"
                         else:
-                            print_err(macrostr, fl, lineno)
-                        macrostr = None
-                        lineno = None
-                else:
-                    assert lineno is None
+                            macro_obj = parse_macro(macrostr, fl, lineno)
+                            if macro_obj:
+                                macro_list.append(macro_obj)
+                                unique_filenames.add(macro_obj.filename)
+                            else:
+                                print_err(macrostr, fl, lineno)
+                            macrostr = None
+                            lineno = None
+                    else:
+                        assert lineno is None
 
 
 def print_err(macrostr, filename, lineno):
