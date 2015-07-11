@@ -74,46 +74,53 @@ def build_defs(p="."):
         sys.exit()
     global macro_list
     macro_list.clear()
-    for fp in file_patterns:
-        for fl in Path(p).rglob(fp):
-            if fl.is_symlink():
+    for fl in Path(p).rglob("*.*[Ccphx+]"):
+        if fl.is_symlink():
+            continue
+        elif not fl.is_file():
+            continue
+        else:
+            for x in file_patterns:
+                if fl.match(x):
+                    break
+            else:
                 continue
-            with fl.open(errors='ignore') as f:
-                macrostr = None
-                lineno = None
-                for (lno, line) in enumerate(f, start=1):
-                    line = line.strip()
-                    if macro_start.match(line):
-                        assert macrostr is None
-                        assert lineno is None
-                        if line.endswith("\\"):
-                            macrostr = line+"\n"
-                            lineno = lno
-                        else:
-                            macro_obj = parse_macro(line, fl, lno)
-                            if macro_obj:
-                                macro_list.append(macro_obj)
-                                unique_filenames.add(macro_obj.filename)
-                            else:
-                                print_err(line, fl, lno)
-                    elif macrostr:
-                        assert isinstance(macrostr, str)
-                        assert isinstance(lineno, int)
-                        assert lineno is not None
-                        macrostr += line
-                        if line.endswith("\\"):
-                            macrostr += "\n"
-                        else:
-                            macro_obj = parse_macro(macrostr, fl, lineno)
-                            if macro_obj:
-                                macro_list.append(macro_obj)
-                                unique_filenames.add(macro_obj.filename)
-                            else:
-                                print_err(macrostr, fl, lineno)
-                            macrostr = None
-                            lineno = None
+        with fl.open(errors='ignore') as f:
+            macrostr = None
+            lineno = None
+            for (lno, line) in enumerate(f, start=1):
+                line = line.strip()
+                if macro_start.match(line):
+                    assert macrostr is None
+                    assert lineno is None
+                    if line.endswith("\\"):
+                        macrostr = line+"\n"
+                        lineno = lno
                     else:
-                        assert lineno is None
+                        macro_obj = parse_macro(line, fl, lno)
+                        if macro_obj:
+                            macro_list.append(macro_obj)
+                            unique_filenames.add(macro_obj.filename)
+                        else:
+                            print_err(line, fl, lno)
+                elif macrostr:
+                    assert isinstance(macrostr, str)
+                    assert isinstance(lineno, int)
+                    assert lineno is not None
+                    macrostr += line
+                    if line.endswith("\\"):
+                        macrostr += "\n"
+                    else:
+                        macro_obj = parse_macro(macrostr, fl, lineno)
+                        if macro_obj:
+                            macro_list.append(macro_obj)
+                            unique_filenames.add(macro_obj.filename)
+                        else:
+                            print_err(macrostr, fl, lineno)
+                        macrostr = None
+                        lineno = None
+                else:
+                    assert lineno is None
 
 
 def print_err(macrostr, filename, lineno):
