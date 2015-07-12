@@ -1,6 +1,7 @@
-Should be run as:
-        ./cmacros.py <path to a C/C++ source directory>
+Dependencies:
+    - Python3.4 or above
 
+To run: ./cmacros.py <path-to-a-C/C++-source-directory>
 It'll will prompt you with <Def:>. Press <Ctrl-D> to exit
 
 Commands:
