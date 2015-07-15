@@ -72,10 +72,18 @@ def build_defs(p="."):
         #raise Exception("Path doesn't exist")
         print("%: Path doesn't exist\n")
         sys.exit()
+    if Path(p).is_file():
+        tmp_file_list = [Path(p)]
+        path_is_not_file = False
+    elif Path(p).is_dir():
+        tmp_file_list = Path(p).rglob("*.*[Ccphx+]")
+        path_is_not_file = True
+    else:
+        return
     global macro_list
     macro_list.clear()
-    for fl in Path(p).rglob("*.*[Ccphx+]"):
-        if fl.is_symlink():
+    for fl in tmp_file_list:
+        if fl.is_symlink() and path_is_not_file:
             continue
         elif not fl.is_file():
             continue
