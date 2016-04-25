@@ -1,8 +1,12 @@
+This program is intended to interactively view/analyse macros in a C/C++ source.
+This program doesn't expand or process macros. It just naively tries to
+do string matching. As long as your macros are not complex it's enough.
+
 Dependencies:
     - Python3.4 or above
 
 To run: ./cmacros.py <path-to-a-C/C++-source-directory>
-It'll will prompt you with <Def:>. Press <Ctrl-D> to exit
+prompt looks like <Def:>. Press <Ctrl-D> to exit
 
 Commands:
 
