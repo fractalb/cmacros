@@ -1,3 +1,5 @@
+*******************************NOT WORKING******************************************
+
 This program is intended to interactively explore/analyse macros in a C/C++ source.
 This program doesn't expand or process macros. It just naively tries to
 do string matching. As long as your macros are not complex it's enough.
